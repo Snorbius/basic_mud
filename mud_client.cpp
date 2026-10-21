@@ -67,6 +67,7 @@ void mud_client::client_loop()
         if (command == "players")   { command_players(); continue; }
         if (command == "move")      { command_move(input); continue; }
         if (command == "fish")      { command_fish(); continue; }
+        if (command == "attack")    { command_attack(); continue; }
         
         print_line("That doesn't seem like a proper command, type 'help' to show what you can do");
     }
@@ -85,6 +86,7 @@ void mud_client::command_help()
     print_line("[MSG message] - send a message to everyone on the server");
     print_line("[MOVE up/down] - move in a certain direction");
     print_line("[FISH] - lets you fish to recover some health, assuming you are at the fishing spot");
+    print_line("[ATTACK] - Attacks the boss, given you are in the boss room. He will attack back :))");
     print_line("[EXIT] - exit the game");
     print_line("");
 }
@@ -150,6 +152,22 @@ void mud_client::command_fish()
     thread_mutex.lock();
     send(connect_socket, message.data(), static_cast<int>(message.length()), 0);
     thread_mutex.unlock();
+}
+
+void mud_client::command_attack()
+{
+    if (current_room != BOSS_ROOM)
+    {
+        print_line("You can only attack the boss if you are in the boss room.");
+        return;
+    }
+    
+    std::string message = "attack";
+    
+    thread_mutex.lock();
+    send(connect_socket, message.data(), message.length(), 0);
+    thread_mutex.unlock();
+    print_line("You attempt a daring attack to the boss man himself...");
 }
 
 void mud_client::handle_tasks()

@@ -25,6 +25,7 @@ private:
     void handle_command_msg(client_connection* from, std::string command);
     void handle_command_move(client_connection* from, std::string command);
     void handle_command_fish(client_connection* from);
+    void handle_command_attack(client_connection* from);
     
     void handle_sending_messages();
 };

@@ -152,9 +152,10 @@ void mud_server::handle_tasks()
             size_t space = message.find(' ');
             std::string command = space == std::string::npos ? message : message.substr(0, space);
             
-            if (command == "msg")   { handle_command_msg(client, message); continue; }
-            if (command == "move")  { handle_command_move(client, message); continue; }
-            if (command == "fish")  { handle_command_fish(client); continue; }
+            if (command == "msg")       { handle_command_msg(client, message); continue; }
+            if (command == "move")      { handle_command_move(client, message); continue; }
+            if (command == "fish")      { handle_command_fish(client); continue; }
+            if (command == "attack")    { handle_command_attack(client); continue; }
         }
     }
 }
@@ -195,6 +196,20 @@ void mud_server::handle_command_fish(client_connection* from)
     from->current_hp = min(from->current_hp + heal_amount, from->MAX_HP);
     
     from->add_to_send_queue(std::format("heal {}", heal_amount));
+}
+
+void mud_server::handle_command_attack(client_connection* from)
+{
+    if (from->current_room != BOSS_ROOM) // Validate that the player is in the boss room
+        return;
+
+    for (client_connection* client : clients)
+        client->add_to_send_queue(std::format("msg attack {}:{}", from->client_id, 10));
+    
+    int client_damage = static_cast<int>((static_cast<float>(rand()) / RAND_MAX) * 25.0f) + 1;
+    from->current_hp -= client_damage;
+    std::string message = std::format("heal {}", -client_damage);
+    from->add_to_send_queue(message);
 }
 
 void mud_server::handle_sending_messages()

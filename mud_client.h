@@ -32,6 +32,7 @@ private:
     void command_players();
     void command_move(std::string input);
     void command_fish();
+    void command_attack();
 
     // handle tasks sent from server
     void handle_tasks();
