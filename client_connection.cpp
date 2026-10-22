@@ -1,5 +1,6 @@
 ﻿#include "client_connection.h"
 
+#include <algorithm>
 #include <format>
 
 #include "utilities.h"
@@ -30,16 +31,40 @@ void client_connection::receive_message()
         return;
     }
 
+    
     std::string message(buffer);
     message = message.substr(0, bytes_received);
-    task_queue.push(message);
     
     print_debug_line("Received message from client: \"" + message + "\"");
+    
+    // Cursed code to replace any non-"a-z plus space/!/?" character with a space. I do not want to write regular expressions :(((
+    for (char& character : message)
+        if (character == 59)
+            character = ' ';
+        
+        // if ((character < 97 || character > 122) && character != 32 && character != 33 && character != 63)
+        //     character = ' ';
+    
+    
+    
+    task_queue.push(message);
+    
+    print_debug_line("Added to task queue: \"" + message + "\"");
 }
 
 void client_connection::add_to_send_queue(std::string message)
 {
     send_queue.push(message);
+}
+
+void client_connection::heal(int amount)
+{
+    current_hp = std::clamp(current_hp + amount, 0, MAX_HP);
+    
+    add_to_send_queue(std::format("heal {}", amount));
+    
+    if (current_hp == 0)
+        queued_for_deletion = true;
 }
 
 void client_connection::send_to_client()

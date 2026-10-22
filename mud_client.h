@@ -10,11 +10,20 @@
 class mud_client
 {
 public:
+    mud_client(PCSTR port, const PCSTR address)
+        : port(port),
+          address(address)
+    {
+    }
+
     void run_client();
     void client_loop();
     void thread_func();
     
 private:
+    PCSTR port;
+    PCSTR address;
+    
     SOCKET connect_socket = -1;
     std::queue<std::string> task_queue;
     bool running = true;
@@ -42,5 +51,8 @@ private:
     void handle_kill_command(std::string input);
     void handle_move_command(std::string input);
     void handle_heal_command(std::string input);
+    void handle_attack_command(std::string input);
+    void handle_boss_command(std::string input);
+    void handle_dead_command();
     void handle_receive_messages();
 };

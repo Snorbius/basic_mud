@@ -28,5 +28,6 @@ public:
     
     void receive_message();
     void add_to_send_queue(std::string message);
+    void heal(int amount);
     void send_to_client();
 };

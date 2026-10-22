@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <queue>
 #include <vector>
 #include <winsock2.h>
 
@@ -11,11 +10,21 @@ class mud_server
 {
 public:
     void run_server();
-    
+
+    explicit mud_server(PCSTR port)
+        : port(port)
+    {
+    }
+
 private:
+    PCSTR port;
+    
     SOCKET listen_socket = -1;
     std::vector<client_connection*> clients;
     u_int next_client_id = 10;
+    int current_boss_health = 100;
+    const int starting_boss_health = 100;
+    int num_defeated = 0;
     
     void server_loop();
     void handle_connecting_clients();

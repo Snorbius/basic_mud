@@ -1,4 +1,5 @@
 
+#include <format>
 #include <iostream>
 #include <winsock2.h>
 
@@ -13,8 +14,19 @@ void print_commands();
 void command_server();
 void command_client();
 
-int main()
+PCSTR input_address = "127.0.0.1";
+PCSTR input_port = "27015";
+
+int main(int argc, char *argv[])
 {
+    if (argc >= 3) // Program name, ip address, port
+    {
+        input_address = argv[1];
+        input_port = argv[2];
+        print_debug_line(std::format("Overwrote ip address: {}", input_address));
+        print_debug_line(std::format("Overwrote port: {}", input_port));
+    }
+    
     WSAData wsa_data;
     print_debug_line("Setting up WSA...");
     int res = WSAStartup(MAKEWORD(2, 2), &wsa_data);
@@ -79,7 +91,7 @@ void print_commands()
 void command_server()
 {
     print_debug_line("Starting up server...");
-    mud_server server;
+    mud_server server(input_port);
     server.run_server();
     print_debug_line("Server has finished running.");
 }
@@ -87,7 +99,7 @@ void command_server()
 void command_client()
 {
     print_debug_line("Starting up client...");
-    mud_client client;
+    mud_client client(input_port, input_address);
     client.run_client();
     print_debug_line("Client has finished running.");
 }

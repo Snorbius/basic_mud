@@ -26,7 +26,7 @@ void mud_client::client_loop()
     settings.ai_protocol = IPPROTO_TCP; // TCP
     
     addrinfo* result;
-    int success = getaddrinfo(IP_ADDRESS, DEFAULT_PORT, &settings, &result);
+    int success = getaddrinfo(address, port, &settings, &result);
     if (success != 0)
     {
         print_line("Could not successfully get address info, error code: " + std::to_string(success));
@@ -184,12 +184,15 @@ void mud_client::handle_tasks()
         
         std::string input = task.substr(space + 1);
         
-        if (command == "init")  { handle_init_command(input); continue; }
-        if (command == "new")   { handle_new_command(input); continue; }
-        if (command == "msg")   { handle_msg_command(input); continue; }
-        if (command == "kill")  { handle_kill_command(input); continue; }
-        if (command == "move")  { handle_move_command(input); continue; }
-        if (command == "heal")  { handle_heal_command(input); continue; }
+        if (command == "init")      { handle_init_command(input);       continue; }
+        if (command == "new")       { handle_new_command(input);        continue; }
+        if (command == "msg")       { handle_msg_command(input);        continue; }
+        if (command == "kill")      { handle_kill_command(input);       continue; }
+        if (command == "move")      { handle_move_command(input);       continue; }
+        if (command == "heal")      { handle_heal_command(input);       continue; }
+        if (command == "attack")    { handle_attack_command(input);     continue; }
+        if (command == "boss")      { handle_boss_command(input);       continue; }
+        if (command == "dead")      { handle_dead_command();               continue; }
         
         print_debug_line(std::format("{}; unrecognizable task", task));
     }
@@ -276,6 +279,33 @@ void mud_client::handle_heal_command(std::string input)
         print_line(std::format("Youch!! You are hit for {} damage!", abs(amount)));
         print_line(std::format("Your new health sits at {}", current_hp));
     }
+}
+
+void mud_client::handle_attack_command(std::string input)
+{
+    u_int attacker_id = std::stoi(input.substr(input.find('c') + 1, input.find('d')));
+    int damage = std::stoi(input.substr(input.find('d') + 1, input.find('b')));
+    int boss_health = std::stoi(input.substr(input.find('b') + 1));
+    
+    std::string attacker_name = connected_players.contains(attacker_id) ? connected_players[attacker_id] : "unknown";
+    
+    print_line(std::format("{} attacks the boss for {} damage! The boss now has {} hp remaining!",
+        attacker_name, damage, boss_health));
+}
+
+void mud_client::handle_boss_command(std::string input)
+{
+    int new_boss_health = std::stoi(input);
+    
+    print_line("The boss has been defeated!");
+    print_line(std::format("A new boss has appeared with {} hp!!", new_boss_health));
+}
+
+void mud_client::handle_dead_command()
+{
+    print_line("The server has decided that you are DEAD!!");
+    print_line("See you again another time :))");
+    running = false;
 }
 
 void mud_client::handle_receive_messages()
